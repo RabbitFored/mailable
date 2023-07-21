@@ -160,6 +160,7 @@ poetry.lock
 pyproject.toml
 .config/
 .upm/
+.lesson/
 venv/
 
 !.gitignore
