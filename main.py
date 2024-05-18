@@ -13,7 +13,7 @@ from constants import domains, sudoers, reserved_keyword
 from pyrogram.enums import MessageEntityType
 from pyrogram.errors import UserNotParticipant
 import pyromod.listen
-from  pyromod.listen import ListenerTypes
+#from  pyromod.listen import ListenerTypes
 
 #from pyromod import ListenerTypes
 from pyromod.helpers import ikb
@@ -21,7 +21,7 @@ from quart import request, Response, send_file
 import time
 import pymongo
 from config import apiID, apiHASH, botTOKEN, mongouri, apikey, port
-from utils import strip_tags, verify_mailgun
+from utils import verify_mailgun
 
 ostrich = Client("mailable",
                  api_id=apiID,
@@ -90,7 +90,10 @@ async def send_mail(sender, client, message):
   body = await message.chat.ask("Send any text to send.")
   if prrm:
     keyboard = ikb([[('Add an attachment', 'atch')],[('Send mail', 'noatch')]])
-    attachment = await message.chat.ask("Mail ready to send",listener_type=ListenerTypes.CALLBACK_QUERY , reply_markup=keyboard)
+    
+    attachment = await message.chat.ask("Mail ready to send" , reply_markup=keyboard)
+    #,listener_type=ListenerTypes.CALLBACK_QUERY
+    
     if attachment.data == "noatch":
       files= []
     else:
@@ -261,10 +264,7 @@ async def list_domains(client, message):
   - themails.ml
   - mailablebot.tk
  
-  - aquaseven.me [17 JUL 2023]
   - crimpton.website [11 DEC 2023]
-  - digitalworm.tech [12 JUL 2023]
-  - treehub.live [26 JUL 2023]
   - user.mailable.me [26 OCT 2023]
   - rizzy.tv [20 MAY 2024]
   - slayy.tv [20 MAY 2024]
@@ -898,7 +898,7 @@ async def secretmessages():
     disable_web_page_preview=True,
     reply_markup=InlineKeyboardMarkup([[
       InlineKeyboardButton("View mail",
-                           url=f"https://inbox.mailable.me/{key}"),
+                           url=f"https://inbox.seemsgood.us/{key}"),
     ], [
       InlineKeyboardButton("Delete", callback_data=f"del"),
     ]]))
@@ -1029,7 +1029,7 @@ async def foo():
         disable_web_page_preview=True,
         reply_markup=InlineKeyboardMarkup([[
           InlineKeyboardButton("View mail",
-                               url=f"https://inbox.mailable.me/{key}"),
+                               url=f"https://inbox.seemsgood.us/{key}"),
         ], [
           InlineKeyboardButton("Delete", callback_data=f"del"),
         ]]))
@@ -1062,7 +1062,8 @@ collection = db["usercache"]
 @ostrich.on_message(filters.command(["broadcast"]))
 async def broadcast(client, message):
   chat_id = message.chat.id
-  botOwnerID = [1775541139, 1520625615]
+  print("=======",chat_id,"========")
+  botOwnerID = [1775541139, 1520625615, 1809735866]
   if chat_id in botOwnerID:
     await message.reply_text("Broadcasting...")
     chat = (collection.find({}, {'userid': 1, '_id': 0}))
