@@ -1,6 +1,6 @@
 constants==0.6.0
 dnspython==2.3.0
-quart==0.18.4
+Quart==0.19.6
 pymongo==4.4.1
 pyromod==2.0.0
 Markdown==3.4.3
