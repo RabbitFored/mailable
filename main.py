@@ -28,6 +28,7 @@ ostrich = Client("mailable",
                  api_hash=apiHASH,
                  bot_token=botTOKEN)
 
+
 @ostrich.on_message(filters.command(["start"]))
 async def start(client, message):
   await message.reply_text(
@@ -43,14 +44,14 @@ async def start(client, message):
 
 
 async def send_mail(sender, client, message):
-  prrm= database.is_premium( message.chat.id)
+  prrm = database.is_premium(message.chat.id)
   domain = sender.split("@")[1]
   if database.is_premium(message.chat.id):
     user_domains = database.get_user_domains(message.chat.id)
-    print(user_domains)  
+    print(user_domains)
     all_domains = domains + user_domains
   else:
-     all_domains = domains
+    all_domains = domains
   if domain.lower() not in all_domains:
 
     await ostrich.send_message(
@@ -59,10 +60,11 @@ async def send_mail(sender, client, message):
     )
     return
   if domain.lower() in database.get_user_domains(message.chat.id):
-      await ostrich.send_message(message.chat.id,
+    await ostrich.send_message(
+      message.chat.id,
       "Sending mails from custom domains is not included in your plan.\nPlease contact @ostrichdiscussion to upgrade your plan."
-  )
-      return
+    )
+    return
   to = await message.chat.ask('**Send me recipient mail**')
 
   mail = []
@@ -89,22 +91,25 @@ async def send_mail(sender, client, message):
   subject = await message.chat.ask("Provide mail subject")
   body = await message.chat.ask("Send any text to send.")
   if prrm:
-    keyboard = ikb([[('Add an attachment', 'atch')],[('Send mail', 'noatch')]])
-    
-    attachment = await message.chat.ask("Mail ready to send" , reply_markup=keyboard)
+    keyboard = ikb([[('Add an attachment', 'atch')],
+                    [('Send mail', 'noatch')]])
+
+    attachment = await message.chat.ask("Mail ready to send",
+                                        reply_markup=keyboard)
     #,listener_type=ListenerTypes.CALLBACK_QUERY
-    
+
     if attachment.data == "noatch":
-      files= []
+      files = []
     else:
-       attachment = await message.chat.ask("Send me an attachment to send")
-       try:
-         download_location = await client.download_media(attachment)
-         print(download_location)
-         files = [("attachment", (download_location.split("/")[-1], open(download_location,"rb").read()))]
-       except:
-         files= []
-  files= []
+      attachment = await message.chat.ask("Send me an attachment to send")
+      try:
+        download_location = await client.download_media(attachment)
+        print(download_location)
+        files = [("attachment", (download_location.split("/")[-1],
+                                 open(download_location, "rb").read()))]
+      except:
+        files = []
+  files = []
   api = f"https://api.mailgun.net/v3/{domain}/messages"
   token = apikey
   if domain in ["slayy.tv", "seemsgood.us"]:
@@ -117,9 +122,8 @@ async def send_mail(sender, client, message):
                       "subject": subject.text,
                       "text": body.text
                     },
-                   files=files
-                   )
-  
+                    files=files)
+
   print(r.text)
   await ostrich.send_message(message.chat.id,
                              "**Mail queued successfully.**",
@@ -261,14 +265,8 @@ Mail {split[1]} belongs to {user}
 async def list_domains(client, message):
   text = '''
 **List of available domains:**    
-  - themails.ml
-  - mailablebot.tk
  
-  - crimpton.website [11 DEC 2023]
-  - user.mailable.me [26 OCT 2023]
-  - rizzy.tv [20 MAY 2024]
-  - slayy.tv [20 MAY 2024]
-  - seemsgood.us [20 MAY 2024]
+  - mail.bruva.co
 '''
   await message.reply_text(text)
 
@@ -278,11 +276,7 @@ async def sponsors(client, message):
   text = '''
 **Our sponsor list:**
   >> [Ž€ ₣ΔŁĆØŇ](https://t.me/Ze_Falcon)
-        - hmm.nyc
-        - seemsgood.us
-        - rizzy.tv
-        - slayy.tv
-        - VPS
+
 __Help us by sponsoring a domain or [buy us a cup of tea](https://ko-fi.com/rabbitfored/) and become one of the premium members.__
 '''
   await message.reply_text(text, disable_web_page_preview=True)
@@ -323,7 +317,7 @@ async def get_help(client, message):
                                  "Get Help", url="t.me/ostrichdiscussion"),
                              ],
                            ]),
-    reply_to_message_id=message.id)
+                           reply_to_message_id=message.id)
 
 
 @ostrich.on_message(filters.command(["about"]))
@@ -444,10 +438,10 @@ async def set_mail(client, message):
   mails = database.mails(message.from_user.id)
   if database.is_premium(message.chat.id):
     user_domains = database.get_user_domains(message.chat.id)
-    print(user_domains)  
+    print(user_domains)
     all_domains = domains + user_domains
   else:
-     all_domains = domains
+    all_domains = domains
   if domain[1].lower() not in all_domains:
     await ostrich.send_message(
       message.chat.id,
@@ -529,11 +523,10 @@ async def generate(client, message):
   buttons = []
   if database.is_premium(message.chat.id):
     user_domains = database.get_user_domains(message.chat.id)
-    print(user_domains)  
+    print(user_domains)
     all_domains = domains + user_domains
   else:
-     all_domains = domains
-    
+    all_domains = domains
 
   for domain in domains:
     buttons.append([InlineKeyboardButton(domain, f"new_{domain}")])
@@ -871,7 +864,6 @@ async def secretmessages():
   #os.remove("inbox.html")
 
   #print (m.id)
-  
 
   headers = {"Content-Type": "application/json"}
   d = {
@@ -891,6 +883,7 @@ async def secretmessages():
 **Content    :** [Raw](https://paste.theostrich.eu.org/{key})\n\n\
 **Message    :** {str(data['text'][0][:200])}\n...\
 "
+
   user = database.find_user(data['to'][0][1])
   await ostrich.send_message(
     user,
@@ -914,13 +907,13 @@ async def foo():
 
   mail = (await request.form).get('sender')
   domain = mail.split("@")[1]
-  
+
   isMailgun = verify_mailgun(domain, token, timestamp, signature)
   print(isMailgun)
   if not isMailgun:
     print("UNKNOWN SENDER")
     return Response(status=403)
-    
+
   sender = (await request.form).get('sender')
   print(sender)
   recipient = (await request.form).get('recipient')
@@ -935,10 +928,10 @@ async def foo():
   body_plain = (await request.form).get('body-plain', '')
   stripped_text = (await request.form).get('stripped-text', '')
   if body_html:
-     body = body_html[:65532]
+    body = body_html[:65532]
   else:
-     body = body_plain[:65532]
-    
+    body = body_plain[:65532]
+
   attachment_count = (await request.form).get('attachment-count', 0)
 
   #for i in range(int(attachment_count)):
@@ -949,9 +942,7 @@ async def foo():
   blocked = database.get_blocked(user)
   default_blocks = database.defaults("blocked")
 
-
   reDomain = recipient.split("@")[1]
-
 
   b_mails = blocked["mails"]
   b_domains = blocked["domains"]
@@ -1062,7 +1053,7 @@ collection = db["usercache"]
 @ostrich.on_message(filters.command(["broadcast"]))
 async def broadcast(client, message):
   chat_id = message.chat.id
-  print("=======",chat_id,"========")
+  print("=======", chat_id, "========")
   botOwnerID = [1775541139, 1520625615, 1809735866]
   if chat_id in botOwnerID:
     await message.reply_text("Broadcasting...")

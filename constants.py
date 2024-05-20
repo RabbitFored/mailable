@@ -1,6 +1,6 @@
 owner = 1520625615
 sudoers = [1520625615, 1775541139]
-domains = ["mailablebot.tk","crimpton.website","rizzy.tv","slayy.tv","seemsgood.us"]
+domains = ["mail.bruva.co"]
 reserved_keyword = [
     'admin', 'owner', 'contact', 'support', 'donate', 'postmaster', 'message',
     'ostrich', 'administrator', 'access', 'account', 'mail', 'email', 'patner',
