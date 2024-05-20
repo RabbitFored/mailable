@@ -38,7 +38,7 @@ async def pages(id):
 
 
 @app.route('/cust', methods=['POST'])
-def reciever():
+async def reciever():
 
   mailbytes = request.get_data()
   mail = mailparser.parse_from_bytes(mailbytes)
@@ -57,8 +57,8 @@ def reciever():
     "message_id" : mail.message_id
     })}
   )
-  requests.post("https://mail.bruva.co/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
-  return 'Hello, World!'
+  await requests.post("https://mail.bruva.co/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
+  return await 'Hello, World!'
 
 def run():
   app.run(host="0.0.0.0", port=8080)
