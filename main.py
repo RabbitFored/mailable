@@ -899,7 +899,7 @@ async def secretmessages():
     caption = text,
     reply_markup=InlineKeyboardMarkup([[
       InlineKeyboardButton("View mail",
-                           url=f"https://mail.bruva.co/inbox{user}/{u.id}"),
+                           url=f"https://mail.bruva.co/inbox/{user}/"),
     ], [
       InlineKeyboardButton("Delete", callback_data=f"del"),
     ]]))
