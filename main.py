@@ -855,6 +855,7 @@ def secretm(id):
 
 @app.route('/secretmessages', methods=['POST'])
 async def secretmessages():
+  print("check")
   data = json.loads((await request.form).get("data"))
 
   #f = open("inbox.html", "w")
@@ -869,9 +870,9 @@ async def secretmessages():
   d = {
     "Title": str(data.get("subject")),
     "Author": "Penker",
-    "Content": str(data["html"][0][:65532])
+    "Content": str(data["html"][0][:1000])
   }
-  req = requests.post("https://paste.theostrich.eu.org/api/documents",
+  req = requests.post("https://nekobin.com/api/documents",
                       data=json.dumps(d),
                       headers=headers)
   res = json.loads(req.text)
@@ -880,7 +881,7 @@ async def secretmessages():
 **Sender     :** {data['from'][0][1]}\n\
 **Recipient  :** {data['to'][0][1]}\n\
 **Subject    :** {data['subject']}\n\
-**Content    :** [Raw](https://paste.theostrich.eu.org/{key})\n\n\
+**Content    :** [Raw](https://nekobin.com/{key})\n\n\
 **Message    :** {str(data['text'][0][:200])}\n...\
 "
 
