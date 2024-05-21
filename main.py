@@ -855,7 +855,7 @@ def secretm(id):
 
 @app.route('/secretmessages', methods=['POST'])
 async def secretmessages():
-
+  print("hi")
   data = json.loads((await request.form).get("data"))
 
   f = open("inbox.html", "w")
@@ -891,7 +891,6 @@ async def secretmessages():
     chat_id = user,
     document = "inbox.html",
     caption = text,
-    disable_web_page_preview=True,
     reply_markup=InlineKeyboardMarkup([[
       InlineKeyboardButton("View mail",
                            url=f"https://inbox.seemsgood.us/"),
