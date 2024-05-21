@@ -859,7 +859,7 @@ async def secretmessages():
   data = json.loads((await request.form).get("data"))
 
   f = open("inbox.html", "w")
-  f.write(bytes(str(data["html"])))
+  f.write(bytes(str(data["text"])))
   f.close()
   
   # m = ostrich.send_document(-1001816373321,"inbox.html")
