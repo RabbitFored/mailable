@@ -858,44 +858,47 @@ async def secretmessages():
 
   data = json.loads((await request.form).get("data"))
 
-  #f = open("inbox.html", "w")
-  #f.write(bytes(str(data["html"])))
-  #f.close()
+  f = open("inbox.html", "w")
+  f.write(bytes(str(data["html"])))
+  f.close()
+  
   # m = ostrich.send_document(-1001816373321,"inbox.html")
   #os.remove("inbox.html")
 
   #print (m.id)
 
-  headers = {"Content-Type": "application/json"}
-  d = {
-    "Title": str(data.get("subject")),
-    "Author": "Penker",
-    "Content": str(data["html"][0][:1000])
-  }
-  req = requests.post("https://nekobin.com/api/documents",
-                      data=json.dumps(d),
-                      headers=headers)
-  res = json.loads(req.text)
-  key = res['result']['key']
+ # headers = {"Content-Type": "application/json"}
+ # d = {
+ #   "Title": str(data.get("subject")),
+ #   "Author": "Penker",
+ #   "Content": str(data["html"][0][:1000])
+ # }
+ # req = requests.post("https://nekobin.com/api/documents",
+ #                     data=json.dumps(d),
+ #                     headers=headers)
+  #res = json.loads(req.text)
+ # key = res['result']['key']
+  #**Content    :** [Raw](https://nekobin.com/{key})\n\n\
   text = f"\
 **Sender     :** {data['from'][0][1]}\n\
 **Recipient  :** {data['to'][0][1]}\n\
 **Subject    :** {data['subject']}\n\
-**Content    :** [Raw](https://nekobin.com/{key})\n\n\
 **Message    :** {str(data['text'][0][:200])}\n...\
 "
 
   user = database.find_user(data['to'][0][1])
-  await ostrich.send_message(
-    user,
-    text,
+  u = await ostrich.send_document(
+    chat_id = user,
+    document = "inbox.html",
+    caption = text,
     disable_web_page_preview=True,
     reply_markup=InlineKeyboardMarkup([[
       InlineKeyboardButton("View mail",
-                           url=f"https://inbox.seemsgood.us/{key}"),
+                           url=f"https://inbox.seemsgood.us/"),
     ], [
       InlineKeyboardButton("Delete", callback_data=f"del"),
     ]]))
+  print(u)
 
   return Response(status=200)
 
