@@ -852,14 +852,20 @@ def secretm(id):
   f = m.download()
   return send_file(f)
 
+@app.route('/inbox/<user>/<id>')
+async def inb(user,id):
+  m = await ostrich.get_messages(user, id)
+  f = await m.download()
+  return send_file(f)
+
 
 @app.route('/secretmessages', methods=['POST'])
 async def secretmessages():
-  print("hi")
+  print((await request.form))
   data = json.loads((await request.form).get("data"))
 
   f = open("inbox.html", "w")
-  f.write(str(data["text"]))
+  f.write(str(data["html"]))
   f.close()
   
   # m = ostrich.send_document(-1001816373321,"inbox.html")
@@ -893,7 +899,7 @@ async def secretmessages():
     caption = text,
     reply_markup=InlineKeyboardMarkup([[
       InlineKeyboardButton("View mail",
-                           url=f"https://inbox.seemsgood.us/"),
+                           url=f"https://mail.bruva.co/inbox{user}/{u.id}"),
     ], [
       InlineKeyboardButton("Delete", callback_data=f"del"),
     ]]))
