@@ -12,6 +12,7 @@ if ENV:
     port = int(os.environ.get("PORT", 5000))  
     mongouri = os.environ.get("mongouri", "")
     apikey = os.environ.get('mailgun_api', '')
+    baseURL = os.environ.get('baseURL', '')
   
     database = os.environ.get("database", "mailable")
     user_collection = os.environ.get('userCollection', "users")

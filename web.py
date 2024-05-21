@@ -4,6 +4,7 @@ from utils import strip_script_tags
 import mailparser
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import json
+from config import baseURL
 
 app = Quart(__name__, template_folder='web')
 
@@ -55,7 +56,8 @@ async def reciever():
     "message_id" : mail.message_id
     })}
   )
-  requests.post("https://mail.bruva.co/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
+  print(multipart_data)
+  requests.post(f"{baseURL}/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
   return 'Hello, World!'
     
 def run():
