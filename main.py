@@ -855,7 +855,7 @@ def secretm(id):
 
 @app.route('/secretmessages', methods=['POST'])
 async def secretmessages():
-  print("check")
+
   data = json.loads((await request.form).get("data"))
 
   #f = open("inbox.html", "w")
