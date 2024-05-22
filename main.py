@@ -854,9 +854,9 @@ def secretm(id):
 
 @app.route('/inbox/<user>/<id>')
 async def inb(user,id):
-  m = await ostrich.get_messages(user, id)
+  m = await ostrich.get_messages(int(user), int(id))
   f = await m.download()
-  return send_file(f)
+  return await send_file(f)
 
 
 @app.route('/secretmessages', methods=['POST'])
@@ -893,6 +893,7 @@ async def secretmessages():
 "
 
   user = database.find_user(data['to'][0][1])
+  
   u = await ostrich.send_document(
     chat_id = user,
     document = "inbox.html",
@@ -1088,4 +1089,5 @@ async def broadcast(client, message):
 
 
 ostrich.start()
-app.run("0.0.0.0", port, loop=ostrich.loop, use_reloader=False)
+app.run("0.0.0.0", port, loop=ostrich.loop, debug=True)
+#use_reloader=False,
