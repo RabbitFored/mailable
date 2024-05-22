@@ -861,8 +861,11 @@ async def inb(user,id):
 
 @app.route('/secretmessages', methods=['POST'])
 async def secretmessages():
-  print((await request.form))
   data = json.loads((await request.form).get("data"))
+  user = database.find_user(data['to'][0][1])
+  
+  alert = await ostrich.send_message(user,text="Incoming mail...")
+  
 
   f = open("inbox.html", "w")
   f.write(str(data["html"]))
@@ -891,20 +894,18 @@ async def secretmessages():
 **Subject    :** {data['subject']}\n\
 **Message    :** {str(data['text'][0][:200])}\n...\
 "
-
-  user = database.find_user(data['to'][0][1])
   
-  u = await ostrich.send_document(
+  await ostrich.send_document(
     chat_id = user,
-    document = "inbox.html",
     caption = text,
-    reply_markup=InlineKeyboardMarkup([[
-      InlineKeyboardButton("View mail",
-                           url=f"https://mail.bruva.co/inbox/{user}/"),
-    ], [
-      InlineKeyboardButton("Delete", callback_data=f"del"),
-    ]]))
-  print(u)
+    document = "inbox.html" ,reply_markup=InlineKeyboardMarkup([[
+     InlineKeyboardButton("View mail",
+                          url=f"https://mail.bruva.co/inbox/{user}/{alert.id + 1}"),
+   ], [
+     InlineKeyboardButton("Delete", callback_data=f"del"),
+   ]]))
+
+  await alert.delete()
 
   return Response(status=200)
 
