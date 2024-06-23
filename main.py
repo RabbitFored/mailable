@@ -2,7 +2,7 @@ import requests
 from web import app
 from pyrogram import Client, filters
 import os
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 import database
 import secrets
 import string
@@ -13,6 +13,7 @@ from constants import domains, sudoers, reserved_keyword
 from pyrogram.enums import MessageEntityType
 from pyrogram.errors import UserNotParticipant
 import pyromod.listen
+from config import baseURL
 #from  pyromod.listen import ListenerTypes
 
 #from pyromod import ListenerTypes
@@ -539,7 +540,6 @@ async def generate(client, message):
 
 @ostrich.on_callback_query()
 async def cb_handler(client, query):
-
   if query.data.startswith('new'):
 
     await query.answer()
@@ -852,8 +852,9 @@ def secretm(id):
   f = m.download()
   return send_file(f)
 
+
 @app.route('/inbox/<user>/<id>')
-async def inb(user,id):
+async def inb(user, id):
   m = await ostrich.get_messages(int(user), int(id))
   f = await m.download()
   return await send_file(f)
@@ -863,30 +864,27 @@ async def inb(user,id):
 async def secretmessages():
   data = json.loads((await request.form).get("data"))
   user = database.find_user(data['to'][0][1])
-  
-  alert = await ostrich.send_message(user,text="Incoming mail...")
-  
 
   f = open("inbox.html", "w")
   f.write(str(data["html"]))
   f.close()
-  
+
   # m = ostrich.send_document(-1001816373321,"inbox.html")
   #os.remove("inbox.html")
 
   #print (m.id)
 
- # headers = {"Content-Type": "application/json"}
- # d = {
- #   "Title": str(data.get("subject")),
- #   "Author": "Penker",
- #   "Content": str(data["html"][0][:1000])
- # }
- # req = requests.post("https://nekobin.com/api/documents",
- #                     data=json.dumps(d),
- #                     headers=headers)
+  # headers = {"Content-Type": "application/json"}
+  # d = {
+  #   "Title": str(data.get("subject")),
+  #   "Author": "Penker",
+  #   "Content": str(data["html"][0][:1000])
+  # }
+  # req = requests.post("https://nekobin.com/api/documents",
+  #                     data=json.dumps(d),
+  #                     headers=headers)
   #res = json.loads(req.text)
- # key = res['result']['key']
+  # key = res['result']['key']
   #**Content    :** [Raw](https://nekobin.com/{key})\n\n\
   text = f"\
 **Sender     :** {data['from'][0][1]}\n\
@@ -894,18 +892,17 @@ async def secretmessages():
 **Subject    :** {data['subject']}\n\
 **Message    :** {str(data['text'][0][:200])}\n...\
 "
-  
-  await ostrich.send_document(
-    chat_id = user,
-    caption = text,
-    document = "inbox.html" ,reply_markup=InlineKeyboardMarkup([[
-     InlineKeyboardButton("View mail",
-                          url=f"https://mail.bruva.co/inbox/{user}/{alert.id + 1}"),
-   ], [
-     InlineKeyboardButton("Delete", callback_data=f"del"),
-   ]]))
 
-  await alert.delete()
+  file = await ostrich.send_document(chat_id=user, document="inbox.html")
+  await file.reply(
+    text=text,
+    reply_markup=InlineKeyboardMarkup([[
+      InlineKeyboardButton(
+        "View mail",
+        web_app=WebAppInfo(url=f"{baseURL}/inbox/{user}/{file.id}")),
+    ], [
+      InlineKeyboardButton("Delete", callback_data="del"),
+    ]]),quote = True)  
 
   return Response(status=200)
 

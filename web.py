@@ -12,6 +12,11 @@ app = Quart(__name__, template_folder='web')
 async def index():
     return await render_template("index.html")
 
+
+@app.route('/test')
+async def tt():
+    return "hi"
+    
 @app.route('/404')
 async def error_page():
     return await render_template("404.html")
