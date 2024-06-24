@@ -24,11 +24,17 @@ rabbit@ostrich:~$ python3 -m mailable
 Stripe:
 https://donate.stripe.com/4gwaEKcIrfoCf5K28b
 
-UPI: ```
-theostrich@upi```
+UPI: 
+```
+theostrich@upi
+```
 
-BTC: ```
-12cNBHVnuCjriPfbfxPazHjpxffq6hRQDG```
+BTC: 
+```
+12cNBHVnuCjriPfbfxPazHjpxffq6hRQDG
+```
 
-USDT (TRC20): ```
-TDnv7TLzGdqCnZYavt68LupsfELUgTR8o8```
+USDT (TRC20): 
+```
+TDnv7TLzGdqCnZYavt68LupsfELUgTR8o8
+```
