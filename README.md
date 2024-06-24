@@ -11,10 +11,10 @@ A telegram bot to send receive mails
 ### ⇝ Install Locally Or On A VPS
 
 ```console
-rabbitforred@ostrich:~$ git clone https://github.com/RabbitFored/mailable
-rabbitforred@ostrich:~$ cd mailable
-rabbitforred@ostrich:~$ pip3 install -U -r requirements.txt
-rabbitforred@ostrich:~$ python3 -m mailable
+rabbit@ostrich:~$ git clone https://github.com/RabbitFored/mailable
+rabbit@ostrich:~$ cd mailable
+rabbit@ostrich:~$ pip3 install -U -r requirements.txt
+rabbit@ostrich:~$ python3 -m mailable
 ```
 
 ## Donations
@@ -24,14 +24,11 @@ rabbitforred@ostrich:~$ python3 -m mailable
 Stripe:
 https://donate.stripe.com/4gwaEKcIrfoCf5K28b
 
-UPI: 
+UPI: ```
+theostrich@upi```
 
-```theostrich@upi```
+BTC: ```
+12cNBHVnuCjriPfbfxPazHjpxffq6hRQDG```
 
-BTC:
-
-```12cNBHVnuCjriPfbfxPazHjpxffq6hRQDG```
-
-USDT (TRC20):
-
-```TDnv7TLzGdqCnZYavt68LupsfELUgTR8o8```
+USDT (TRC20): ```
+TDnv7TLzGdqCnZYavt68LupsfELUgTR8o8```
