@@ -1,0 +1,17 @@
+owner: 1520625615
+admins: [1775541139, 1520625615, 1809735866]
+
+broadcast:
+  users: all    #no. of users to send the message to
+  mode: forward #available options: forward, copy
+
+domains: ['mail.bruva.co']
+reserved_keyword : [
+    'admin', 'owner', 'contact', 'support', 'donate', 'postmaster', 'message',
+    'ostrich', 'administrator', 'access', 'account', 'mail', 'email', 'patner',
+    'admins', 'porn', 'gov', 'government', 'noreply', 'subscribe', 'free',
+    'paid', 'api', 'auth', 'dev', 'developers', 'docs', 'faq', 'group',
+    'groups', 'help', 'hostmaster', 'join', 'local', 'login', 'master',
+    'register', 'root', 'terms', 'user', 'webmaster', 'quantum', 'theostrich',
+    'chat', 'melvik', 'storm', 'melvikstorm'
+]

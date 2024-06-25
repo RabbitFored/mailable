@@ -1,6 +1,5 @@
 from pyrogram import filters
 from mailable import bot, app
-from mailable.utils import verify_mailgun
 from mailable.modules import database as db
 from pyrogram.enums import MessageEntityType
 from mailable.constants import domains, sudoers, reserved_keyword
@@ -9,11 +8,14 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInf
 from tldextract import extract
 import re
 from pyromod.helpers import ikb
-from config import apikey, baseURL
+from mailable import CONFIG
 import requests 
 import os
 from quart import request, Response, send_file
 import json
+
+apikey = CONFIG["apikey"]
+baseURL = CONFIG["baseURL"]
 
 @bot.on_message(filters.command(["set"]))
 async def set_mail(client, message):
@@ -454,7 +456,7 @@ async def block(client, message, option):
       f"**No valid {option} provided.\nUse /block to restart this process**")
     return
 
-  database.block(message.chat.id, option, trigger)
+  db.block(message.chat.id, option, trigger)
   await value.reply_text(text)
 
 
@@ -479,12 +481,6 @@ def secretm(id):
   return send_file(f)
 
 
-@app.route('/inbox/<user>/<id>')
-async def inb(user, id):
-  m = await bot.get_messages(int(user), int(id))
-  f = await m.download()
-  return await send_file(f)
-
 
 @app.route('/secretmessages', methods=['POST'])
 async def secretmessages():
@@ -492,7 +488,7 @@ async def secretmessages():
   user = db.find_user(data['to'][0][1])
 
   f = open("inbox.html", "w")
-  f.write(str(data["html"]))
+  f.write(str(data["html"][0]))
   f.close()
 
   # m = ostrich.send_document(-1001816373321,"inbox.html")

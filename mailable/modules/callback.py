@@ -1,6 +1,7 @@
 from mailable import bot
 from mailable.modules import database as db
 import string
+from mailable.strings import PRIVACY_POLICY
 import secrets
 from mailable.constants import sudoers
 from pyrogram.errors import UserNotParticipant
@@ -27,20 +28,20 @@ async def cb_handler(client, query):
     if query.message.chat.id in sudoers:
       cb = query.data.split("_")
       domain = cb[1]
-      mail = user + "@" + domain
-      text = db.add_mail(query.message.chat.id, mail)
+      mailID = user + "@" + domain
+      text = db.add_mail(query.message.chat.id, mailID)
       await query.message.reply_text(
-        f"Mail Created successfully.\nYour mail id : {mail}\nNow You can access your mails here."
+        f"Mail Created successfully.\nYour mail id : {mailID}\nNow You can access your mails here."
       )
       return
     if len(mails) < 2:
       cb = query.data.split("_")
       domain = cb[1]
-      mail = user + "@" + domain
-      text = db.add_mail(query.message.chat.id, mail)
+      mailID = user + "@" + domain
+      text = db.add_mail(query.message.chat.id, mailID)
       await bot.send_message(
         query.message.chat.id,
-        f"Mail Created successfully.\nYour mail id : {mail}\nNow You can access your mails here."
+        f"Mail Created successfully.\nYour mail id : {mailID}\nNow You can access your mails here."
       )
     elif len(mails) > 1:
       if len(mails) < member_mail_limit:
@@ -50,11 +51,11 @@ async def cb_handler(client, query):
           cb = query.data.split("_")
           domain = cb[1]
 
-          mail = user + "@" + domain
-          text = db.add_mail(query.message.chat.id, mail)
+          mailID = user + "@" + domain
+          text = db.add_mail(query.message.chat.id, mailID)
           await bot.send_message(
             query.message.chat.id,
-            f"Mail Created successfully.\nYour mail id : {mail}\nNow You can access your mails here."
+            f"Mail Created successfully.\nYour mail id : {mailID}\nNow You can access your mails here."
           )
 
         except UserNotParticipant:
@@ -120,36 +121,10 @@ async def cb_handler(client, query):
 
   elif query.data == "prp":
     await query.answer()
-    prp = '''
-**Privacy Policy:**
-
-We are committed to protecting and respecting your privacy.
-It is our overriding policy to collect as little user information as possible when using the Service.
-
-This Privacy Policy explains (i) what information we collect through your access and use of our Service, (ii) the use we make of such information
-
-By using this Service, you agree to the terms outlined in this Privacy Policy.
-
-**Data we collect and why we collect it:**
-
-- **Account creation:**
-     Data like your telegram username, user id, date of creation are collected at the time of account creation (starting the bot).
-This information is necessary to provide the service and support.
-
-- **Mail content:**
-    All mail contents are stored temporarily to provide web view access to the users.
-
-**Note:** _These mails will never be accessed by us (or) some others unless you share the access link. It is your sole responsibility to protect the access links shared by bot._
-
-**Changes to our Privacy Policy**
-
-We reserve the right to periodically review and change this Policy and will notify users who have enabled the notification preference about any change. Continued use of the Service will be deemed as acceptance of such changes.
-
-**We may stop this service at any time without prior notice.**
-
-        '''
+    text = PRIVACY_POLICY
+    
     await query.message.edit(
-      text=prp,
+      text,
       reply_markup=InlineKeyboardMarkup(
         [[InlineKeyboardButton("Back", callback_data="back_to_start")]]))
 
@@ -158,16 +133,16 @@ We reserve the right to periodically review and change this Policy and will noti
     option = query.data[6:]
     await mail.block(client, query.message, option)
   elif query.data.startswith("transfer"):
-    mail = query.data.split("_")[1]
-    await mail.transfer_mail(client, query.message, mail)
+    mailID = query.data.split("_")[1]
+    await mail.transfer_mail(client, query.message, mailID)
   elif query.data.startswith('unblock'):
     await query.answer()
     option = query.data[8:]
     await mail.unblock(client, query.message, option)
   elif query.data.startswith('info'):
-    mail = query.data[5:]
+    mailID = query.data[5:]
     text = f'''**
-Mail  : {mail}
+Mail  : {mailID}
 Owner : {query.message.reply_to_message.from_user.mention()}
 **'''
     await query.message.edit_text(text)

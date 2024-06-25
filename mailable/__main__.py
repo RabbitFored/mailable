@@ -5,9 +5,9 @@ from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from mailable import strings
 from mailable.modules import database as db
-from config import apiID, apiHASH, botTOKEN, mongouri, apikey, port
+from mailable import CONFIG
 
-
+#load all modules
 def install_modules():
     for module in ALL_MODULES:
         importlib.import_module("mailable.modules." + module)
@@ -36,6 +36,13 @@ async def start(client, message):
 @bot.on_message(filters.command(["help"]))
 async def get_help(client, message):
     text = strings.HELP_TEXT
+
+    #extended help message for bot administrator
+    chatID = message.chat.id
+    admins = CONFIG["settings"]["admins"]
+    if chatID in admins:
+        text += strings.ADMIN_HELP_TEXT
+    
     keyboard = [
         [
             InlineKeyboardButton("Get Help", url="t.me/ostrichdiscussion"),
@@ -84,4 +91,4 @@ if __name__ == "__main__":
     install_modules()
     logger.info("Successfully loaded modules: " + str(ALL_MODULES))
     bot.start()
-    app.run("0.0.0.0", port, loop=bot.loop, debug=True)
+    app.run("0.0.0.0", CONFIG["port"], loop=bot.loop, debug=True)

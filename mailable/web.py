@@ -4,7 +4,7 @@ from mailable.utils import strip_script_tags
 import mailparser
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import json
-from config import baseURL
+from mailable import CONFIG, bot
 
 app = Quart(__name__, template_folder='assets')
 
@@ -26,7 +26,7 @@ async def ico():
 
 @app.route('/ostrich.png')
 async def ost():
-    return await send_file("web/images/ostrich.png")
+    return await send_file("mailable/assets/images/ostrich.png")
 
 
 @app.route('/mail/<id>', methods=['GET'])
@@ -36,6 +36,14 @@ async def pages(id):
     content = req.text
     nojs = strip_script_tags(content)
     return await render_template("inbox.html" , content = nojs )
+    
+@app.route('/inbox/<user>/<id>')
+async def inb(user, id):
+  m = await bot.get_messages(int(user), int(id))
+  file = await m.download()
+  f = open(file, "r")
+  return await render_template("inbox.html" , content = f.read() )
+
 
 @app.route('/cust', methods=['POST'])
 async def reciever():
@@ -56,8 +64,7 @@ async def reciever():
     "message_id" : mail.message_id
     })}
   )
-  print(multipart_data)
-  requests.post(f"{baseURL}/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
+  requests.post(f"{CONFIG['baseURL']}/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
   return 'Hello, World!'
 
 def run():

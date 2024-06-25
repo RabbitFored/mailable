@@ -31,6 +31,11 @@ HELP_TEXT = '''
 /donate : Donate us.
 '''
 
+ADMIN_HELP_TEXT = '''
+**Administrator Commands:**
+/broadcast : Broadcast a message to all users      
+'''
+
 ABOUT_TEXT = '''
 <b>Hello! I am MailableBot.</b>
 I make temp mas for you.
@@ -46,3 +51,37 @@ DONATE_TEXT = '''
 Thank you for your wish to contribute. I hope you enjoyed using our services. Make a small donation/contribute to let this project alive.
 '''
 
+PRIVACY_POLICY = '''
+**Privacy Policy:**
+
+We are committed to protecting and respecting your privacy.
+It is our overriding policy to collect as little user information as possible when using the Service.
+
+This Privacy Policy explains (i) what information we collect through your access and use of our Service, (ii) the use we make of such information
+
+By using this Service, you agree to the terms outlined in this Privacy Policy.
+
+**Data we collect and why we collect it:**
+
+- **Account creation:**
+     Data like your telegram username, user id, date of creation are collected at the time of account creation (starting the bot).
+This information is necessary to provide the service and support.
+
+- **Mail content:**
+    All mail contents are stored temporarily to provide web view access to the users.
+
+**Note:** _These mails will never be accessed by us (or) some others unless you share the access link. It is your sole responsibility to protect the access links shared by bot._
+
+**Changes to our Privacy Policy**
+
+We reserve the right to periodically review and change this Policy and will notify users who have enabled the notification preference about any change. Continued use of the Service will be deemed as acceptance of such changes.
+
+**We may stop this service at any time without prior notice.**
+'''
+
+SPONSORS_TEXT = '''
+**Our sponsor list:**
+  >> [Ž€ ₣ΔŁĆØŇ](https://t.me/Ze_Falcon)
+
+__Help us by sponsoring a domain or [buy us a cup of tea](https://ko-fi.com/rabbitfored/) and become one of the premium members.__
+'''

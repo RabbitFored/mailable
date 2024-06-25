@@ -2,9 +2,9 @@ import importlib
 import glob
 from os.path import basename, dirname, isfile
 from pymongo import MongoClient
-from config import mongouri
+from mailable import CONFIG
 
-mongoclient = MongoClient(mongouri)
+mongoclient = MongoClient(CONFIG["mongouri"])
 database = mongoclient['mailis']
 collection = database["usercache"]
 
