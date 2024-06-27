@@ -1,7 +1,7 @@
 from mailable import bot
 from mailable.modules import database as db
 import string
-from mailable.strings import PRIVACY_POLICY
+from mailable.strings import PRIVACY_POLICY, WELCOME_TEXT
 import secrets
 from mailable.constants import sudoers
 from pyrogram.errors import UserNotParticipant
@@ -17,6 +17,7 @@ async def cb_handler(client, query):
 
     await query.answer()
     await query.message.delete()
+    
     alphabet = string.ascii_letters + string.digits
     user = ''.join(secrets.choice(alphabet) for i in range(8))
     mails = db.mails(query.message.chat.id)
@@ -71,6 +72,7 @@ async def cb_handler(client, query):
           query.message.chat.id,
           f"**Your plan includes reserving {member_mail_limit} mails only.\nSwitch to premium plan or delete any mail using /delete to make more mails.**"
         )
+        
   elif query.data == 'close':
     await query.message.delete()
   elif query.data == 'del':
@@ -110,23 +112,31 @@ async def cb_handler(client, query):
     await query.message.delete()
   elif query.data == "back_to_start":
     await query.answer()
+    
+    text = WELCOME_TEXT.format(user=query.message.from_user.mention)
+    keyboard = [
+        [
+            InlineKeyboardButton("HELP", callback_data="getHelp"),
+            InlineKeyboardButton("Privacy Policy", callback_data="prp"),
+        ]
+    ]
     await query.message.edit(
-      text=f"**Hello {query.message.from_user.mention} 👋 !\n\n"
-      "I am mail bot. I can forward all your mails here.\n\nHit help to know more on using me.**",
+      text,
       disable_web_page_preview=True,
-      reply_markup=InlineKeyboardMarkup([[
-        InlineKeyboardButton("HELP", callback_data="getHelp"),
-        InlineKeyboardButton("Privacy Policy", callback_data="prp"),
-      ]]))
+      reply_markup=InlineKeyboardMarkup(keyboard))
 
   elif query.data == "prp":
     await query.answer()
     text = PRIVACY_POLICY
+    keyboard = [
+        [
+          InlineKeyboardButton("Back", callback_data="back_to_start")
+        ]
+    ]
     
     await query.message.edit(
       text,
-      reply_markup=InlineKeyboardMarkup(
-        [[InlineKeyboardButton("Back", callback_data="back_to_start")]]))
+      reply_markup=InlineKeyboardMarkup(keyboard))
 
   elif query.data.startswith('block'):
     await query.answer()
@@ -139,11 +149,18 @@ async def cb_handler(client, query):
     await query.answer()
     option = query.data[8:]
     await mail.unblock(client, query.message, option)
+    
   elif query.data.startswith('info'):
     mailID = query.data[5:]
     text = f'''**
 Mail  : {mailID}
 Owner : {query.message.reply_to_message.from_user.mention()}
 **'''
-    await query.message.edit_text(text)
+    keyboard = [
+        [
+            InlineKeyboardButton("Transfer", callback_data=f"transfer_{mailID}") ],
+         [   InlineKeyboardButton("Delete", callback_data=f"delete_{mailID}")
+        ]
+    ]
+    await query.message.edit(text,reply_markup=InlineKeyboardMarkup(keyboard))
 

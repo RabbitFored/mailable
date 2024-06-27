@@ -1,5 +1,19 @@
-owner: 1520625615
-admins: [1775541139, 1520625615, 1809735866]
+root: 1520625615    #top privilage user <no limits>
+sudoers: ["admins"] #grps with admin privilage, should be added in groups
+
+groups:
+- name: "free"
+  limits: 
+    max_mails: 3   
+- name: "premium"
+  limits: 
+    max_mails: 5
+- name: "admins"
+  users: [1775541139, 1520625615, 1809735866]
+  limits: 
+    max_mails: 5
+
+force_sub: true
 
 broadcast:
   users: all    #no. of users to send the message to

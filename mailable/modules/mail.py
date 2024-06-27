@@ -14,13 +14,51 @@ import os
 from quart import request, Response, send_file
 import json
 
-apikey = CONFIG["apikey"]
-baseURL = CONFIG["baseURL"]
+apikey = CONFIG.apikey
+baseURL = CONFIG.baseURL
+
+
+@bot.on_message(filters.command(["mails"]))
+async def mails(client, message):
+  user = message.from_user.id
+  mails = db.mails(user)
+
+  if len(mails) != 0:
+    buttons = []
+
+    for mail in mails:
+      buttons.append([InlineKeyboardButton(mail, f"info_{mail}")])
+    await message.reply_text(text="**Select a mail:**",
+                             reply_markup=InlineKeyboardMarkup(buttons),
+                             reply_to_message_id=message.id)
+  else:
+    await message.reply_text(
+      text="**You don't own any mail.\nUse /generate to get a new domain.**")
+
+
+@bot.on_message(filters.command(["generate"]))
+async def generate(client, message):
+  buttons = []
+  domains = CONFIG.settings["domains"]
+  
+  if db.is_premium(message.chat.id):
+    user_domains = db.get_user_domains(message.chat.id)
+    all_domains = domains + user_domains
+  else:
+    all_domains = domains
+
+  for domain in domains:
+    buttons.append([InlineKeyboardButton(domain, f"new_{domain}")])
+
+  await message.reply_text(text="**Select a domain:**",
+                           disable_web_page_preview=True,
+                           reply_markup=InlineKeyboardMarkup(buttons),
+                           reply_to_message_id=message.id)
+  
 
 @bot.on_message(filters.command(["set"]))
 async def set_mail(client, message):
   mail = None
-
   for entity in message.entities:
     if entity.type == MessageEntityType.EMAIL:
       o = entity.offset
@@ -102,23 +140,6 @@ async def set_mail(client, message):
         f"Free users can make {member_mail_limit} mails only.\nSwitch to premium plan or delete any mail using /delete."
       )
 
-
-@bot.on_message(filters.command(["mails"]))
-async def mails(client, message):
-  user = message.from_user.id
-  mails = database.mails(user)
-
-  if len(mails) != 0:
-    buttons = []
-
-    for mail in mails:
-      buttons.append([InlineKeyboardButton(mail, f"info_{mail}")])
-    await message.reply_text(text="**Select a mail:**",
-                             reply_markup=InlineKeyboardMarkup(buttons),
-                             reply_to_message_id=message.id)
-  else:
-    await message.reply_text(
-      text="**You don't own any mail.\nUse /generate to get a new domain.**")
 
 
 @bot.on_message(filters.command(["delete"]))
@@ -225,27 +246,6 @@ async def unblock_mail(client, message):
     ], [InlineKeyboardButton("regex", callback_data="unblock_regex")]]),
     disable_web_page_preview=True)
 
-@bot.on_message(filters.command(["generate"]))
-async def generate(client, message):
-  buttons = []
-  if db.is_premium(message.chat.id):
-    user_domains = db.get_user_domains(message.chat.id)
-    print(user_domains)
-    all_domains = domains + user_domains
-  else:
-    all_domains = domains
-
-  for domain in domains:
-    buttons.append([InlineKeyboardButton(domain, f"new_{domain}")])
-
-  await message.reply_text(text=f"**Select a domain:**",
-                           disable_web_page_preview=True,
-                           reply_markup=InlineKeyboardMarkup(buttons),
-                           reply_to_message_id=message.id)
-
-
-
-
 
 
 
@@ -294,7 +294,7 @@ async def unblock(client, message, option):
 
 
 
-
+'''
 
 async def send_mail(sender, client, message):
   prrm = db.is_premium(message.chat.id)
@@ -404,11 +404,7 @@ async def send(client, message):
     await message.reply_text(
       text="**You don't own any mail.\nUse /generate to get a new domain.**")
 
-
-
-
-
-
+'''
 
 
 async def block(client, message, option):

@@ -1,18 +1,16 @@
 from pyrogram import filters
 from mailable import bot
 from mailable.modules import database as db
+from mailable.modules.filters import sudo_filter
 
-
-@bot.on_message(filters.command(["whoo"]))
-async def whoo(client, message):
+@bot.on_message(filters.command(["whois"]) & sudo_filter )
+async def whois(client, message):
   split = message.text.split(" ")
   user = db.find_user(split[1])
 
-  await message.reply_text(f'''
-Mail {split[1]} belongs to {user}
-    ''')
+  await message.reply_text(f'''Mail {split[1]} belongs to {user}''')
 
-@bot.on_message(filters.command(["user"]))
+@bot.on_message(filters.command(["user"])  & sudo_filter )
 async def user(client, message):
   split = message.text.split(" ")
   user = None
@@ -33,7 +31,6 @@ async def user(client, message):
 **Plan:** `{user['plan']['type']}`
 **Mails:** `{user['mails']}`
 **First seen:** `{user['firstseen']}`
-
 '''
 
   await message.reply_text(text)

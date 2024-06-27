@@ -8,7 +8,7 @@ from mailable.modules import database as db
 async def broadcast(client, message):
 
     chatID = message.chat.id
-    admins = CONFIG["settings"]["admins"]
+    admins = CONFIG.settings["admins"]
 
     if chatID in admins:
         if PROCESSES.broadcast:
@@ -25,7 +25,7 @@ async def broadcast(client, message):
         PROCESSES.broadcast = True
         failed = 0
         x = 0
-        mode = CONFIG["settings"]["broadcast"]["mode"]
+        mode = CONFIG.settings["broadcast"]["mode"]
         if len(message.text.split(" ")) > 1:
             mode = message.text.split(" ")[1]
         for user in users:

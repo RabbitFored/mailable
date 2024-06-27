@@ -4,7 +4,7 @@ from os.path import basename, dirname, isfile
 from pymongo import MongoClient
 from mailable import CONFIG
 
-mongoclient = MongoClient(CONFIG["mongouri"])
+mongoclient = MongoClient(CONFIG.mongouri)
 database = mongoclient['mailis']
 collection = database["usercache"]
 

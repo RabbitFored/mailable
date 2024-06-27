@@ -5,6 +5,7 @@ import mailparser
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import json
 from mailable import CONFIG, bot
+import os
 
 app = Quart(__name__, template_folder='assets')
 
@@ -29,20 +30,23 @@ async def ost():
     return await send_file("mailable/assets/images/ostrich.png")
 
 
-@app.route('/mail/<id>', methods=['GET'])
-async def pages(id):
-    url = f"https://paste.theostrich.eu.org/raw/{id}"
-    req = requests.get(url)
-    content = req.text
-    nojs = strip_script_tags(content)
-    return await render_template("inbox.html" , content = nojs )
+#@app.route('/mail/<id>', methods=['GET'])
+#async def pages(id):
+#    url = f"https://paste.theostrich.eu.org/raw/{id}"
+#    req = requests.get(url)
+#    content = req.text
+#    nojs = strip_script_tags(content)
+#    return await render_template("inbox.html" , content = nojs )
     
 @app.route('/inbox/<user>/<id>')
-async def inb(user, id):
+async def inbox(user, id):
   m = await bot.get_messages(int(user), int(id))
   file = await m.download()
   f = open(file, "r")
-  return await render_template("inbox.html" , content = f.read() )
+  content = f.read()
+  nojs = strip_script_tags(content)
+  os.remove(file)
+  return await render_template("inbox.html" , content = nojs)
 
 
 @app.route('/cust', methods=['POST'])
@@ -64,7 +68,7 @@ async def reciever():
     "message_id" : mail.message_id
     })}
   )
-  requests.post(f"{CONFIG['baseURL']}/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
+  requests.post(f"{CONFIG.baseURL}/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
   return 'Hello, World!'
 
 def run():

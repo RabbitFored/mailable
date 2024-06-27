@@ -15,8 +15,6 @@ HELP_TEXT = '''
 /set <mail> : Set mail to your
    Eg: `/set foo@cometdown.me`
 
-/send : Send a mail
-
 /mails  : List your mails
 /delete : Release a mail id
 /transfer: Tranfers a mail
@@ -30,10 +28,14 @@ HELP_TEXT = '''
 /about : About me
 /donate : Donate us.
 '''
+# /send : Send a mail      //feature disabled
 
 ADMIN_HELP_TEXT = '''
 **Administrator Commands:**
 /broadcast : Broadcast a message to all users      
+/stats : Check stats of your bot
+/whois : Check mail informaton
+/user : Check user info
 '''
 
 ABOUT_TEXT = '''
@@ -84,4 +86,8 @@ SPONSORS_TEXT = '''
   >> [Ž€ ₣ΔŁĆØŇ](https://t.me/Ze_Falcon)
 
 __Help us by sponsoring a domain or [buy us a cup of tea](https://ko-fi.com/rabbitfored/) and become one of the premium members.__
+'''
+
+FORCE_SUB_TEXT = '''
+Subscribe to @theostrich to use this bot
 '''

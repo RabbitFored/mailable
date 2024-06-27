@@ -5,7 +5,7 @@ from mailable import CONFIG
 
 @bot.on_message(filters.command(["domains"]))
 async def list_domains(client, message):
-    domains = CONFIG["settings"]["domains"]
+    domains = CONFIG.settings["domains"]
     if len(domains) == 0:
         await message.reply_text("No domains found.")
     else:
