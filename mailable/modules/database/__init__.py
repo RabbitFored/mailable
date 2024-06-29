@@ -5,8 +5,8 @@ from pymongo import MongoClient
 from mailable import CONFIG
 
 mongoclient = MongoClient(CONFIG.mongouri)
-database = mongoclient['mailis']
-collection = database["usercache"]
+database = mongoclient[CONFIG.settings["MongoDB"]["database"]]
+collection = database[CONFIG.settings["MongoDB"]["collection"]]
 
 
 def list_all_modules():

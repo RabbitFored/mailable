@@ -7,7 +7,7 @@ from mailable.constants import sudoers
 from pyrogram.errors import UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import requests
-from mailable.modules import mail
+from mailable.modules.mail import *
 from mailable.__main__ import get_help
 
 
@@ -18,66 +18,29 @@ async def cb_handler(client, query):
     await query.answer()
     await query.message.delete()
     
-    alphabet = string.ascii_letters + string.digits
-    user = ''.join(secrets.choice(alphabet) for i in range(8))
-    mails = db.mails(query.message.chat.id)
-
-    limits = db.get_limits(query.message.chat.id)
-    member_mail_limit = limits["limits"]["mails"]["member"]
-    non_member_mail_limit = limits["limits"]["mails"]["non_member"]
-
-    if query.message.chat.id in sudoers:
-      cb = query.data.split("_")
-      domain = cb[1]
-      mailID = user + "@" + domain
-      text = db.add_mail(query.message.chat.id, mailID)
-      await query.message.reply_text(
-        f"Mail Created successfully.\nYour mail id : {mailID}\nNow You can access your mails here."
-      )
-      return
-    if len(mails) < 2:
-      cb = query.data.split("_")
-      domain = cb[1]
-      mailID = user + "@" + domain
-      text = db.add_mail(query.message.chat.id, mailID)
+    user = db.get_user(query.message.chat.id)
+    mails = user.mails
+    limits = user.get_limits()
+    max_mails = limits["max_mails"]
+    
+    if len(mails) >= max_mails:
       await bot.send_message(
         query.message.chat.id,
-        f"Mail Created successfully.\nYour mail id : {mailID}\nNow You can access your mails here."
-      )
-    elif len(mails) > 1:
-      if len(mails) < member_mail_limit:
-        try:
-          user_exist = await client.get_chat_member('theostrich',
-                                                    query.message.chat.id)
-          cb = query.data.split("_")
-          domain = cb[1]
-
-          mailID = user + "@" + domain
-          text = db.add_mail(query.message.chat.id, mailID)
-          await bot.send_message(
-            query.message.chat.id,
+        f"**Your plan includes reserving {max_mails} mails only.\nSwitch to premium plan to make more mails.**")
+      return
+      
+    alphabet = string.ascii_letters + string.digits
+    domain = query.data.split("_")[1]
+    mailID = ''.join(secrets.choice(alphabet) for i in range(8)) + "@" + domain
+    db.add_mail(query.message.chat.id, mailID)
+    await query.message.reply_text(
             f"Mail Created successfully.\nYour mail id : {mailID}\nNow You can access your mails here."
           )
 
-        except UserNotParticipant:
-          await query.message.reply_text(
-            text=
-            f"**Due to limited resource, making mails more than {non_member_mail_limit} requires channel membership.**",
-            reply_markup=InlineKeyboardMarkup([[
-              InlineKeyboardButton(text="Join theostrich",
-                                   url=f"https://t.me/theostrich")
-            ]]))
-      else:
-        await bot.send_message(
-          query.message.chat.id,
-          f"**Your plan includes reserving {member_mail_limit} mails only.\nSwitch to premium plan or delete any mail using /delete to make more mails.**"
-        )
-        
   elif query.data == 'close':
     await query.message.delete()
-  elif query.data == 'del':
+  elif query.data == 'dl':
     id = query.message.reply_markup.inline_keyboard[0][0].url.split("/")[-1]
-    print(id)
 
     await client.send_message(
       query.message.chat.id,
@@ -96,7 +59,7 @@ async def cb_handler(client, query):
 
   elif query.data == "nope":
     await query.message.delete()
-  elif query.data.startswith('delete'):
+  elif query.data.startswith('del'):
     await query.answer()
     mail = query.data[7:]
     db.delete_mail(query.message.chat.id, mail)
@@ -142,9 +105,9 @@ async def cb_handler(client, query):
     await query.answer()
     option = query.data[6:]
     await mail.block(client, query.message, option)
-  elif query.data.startswith("transfer"):
+  elif query.data.startswith("tr"):
     mailID = query.data.split("_")[1]
-    await mail.transfer_mail(client, query.message, mailID)
+    await transfer_mail(client, query.message, mailID)
   elif query.data.startswith('unblock'):
     await query.answer()
     option = query.data[8:]

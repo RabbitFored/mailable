@@ -13,184 +13,78 @@ import requests
 import os
 from quart import request, Response, send_file
 import json
+import mailparser
 
 apikey = CONFIG.apikey
 baseURL = CONFIG.baseURL
 
-
-@bot.on_message(filters.command(["mails"]))
-async def mails(client, message):
-  user = message.from_user.id
-  mails = db.mails(user)
-
-  if len(mails) != 0:
-    buttons = []
-
-    for mail in mails:
-      buttons.append([InlineKeyboardButton(mail, f"info_{mail}")])
-    await message.reply_text(text="**Select a mail:**",
-                             reply_markup=InlineKeyboardMarkup(buttons),
-                             reply_to_message_id=message.id)
-  else:
-    await message.reply_text(
-      text="**You don't own any mail.\nUse /generate to get a new domain.**")
-
-
-@bot.on_message(filters.command(["generate"]))
-async def generate(client, message):
-  buttons = []
-  domains = CONFIG.settings["domains"]
-  
-  if db.is_premium(message.chat.id):
-    user_domains = db.get_user_domains(message.chat.id)
-    all_domains = domains + user_domains
-  else:
-    all_domains = domains
-
-  for domain in domains:
-    buttons.append([InlineKeyboardButton(domain, f"new_{domain}")])
-
-  await message.reply_text(text="**Select a domain:**",
-                           disable_web_page_preview=True,
-                           reply_markup=InlineKeyboardMarkup(buttons),
-                           reply_to_message_id=message.id)
-  
-
-@bot.on_message(filters.command(["set"]))
-async def set_mail(client, message):
-  mail = None
-  for entity in message.entities:
-    if entity.type == MessageEntityType.EMAIL:
-      o = entity.offset
-      l = entity.length
-      mail = message.text[o:o + l]
-  if mail == None:
-    await message.reply_text(text="**Provide a valid mail ID.**")
-    return
-
-  domain = mail.split("@")
-
-  if domain[0].lower() in reserved_keyword:
-    await bot.send_message(message.chat.id,
-                               f"**Sorry this mail ID is unavailable**")
-    return
-
-  limits = db.get_limits(message.chat.id)
-  member_mail_limit = limits["limits"]["mails"]["member"]
-  non_member_mail_limit = limits["limits"]["mails"]["non_member"]
-  mails = db.mails(message.from_user.id)
-  if db.is_premium(message.chat.id):
-    user_domains = db.get_user_domains(message.chat.id)
-    print(user_domains)
-    all_domains = domains + user_domains
-  else:
-    all_domains = domains
-  if domain[1].lower() not in all_domains:
-    await bot.send_message(
-      message.chat.id,
-      f"**The domain {domain[1]} is not maintained by us.\nUse /domains to check list of available domains.\n\nIf you are the owner of {domain[1]} and interested to use it in this bot, contact us at @ostrichdiscussion.**"
-    )
-    return
-  if message.from_user.id in sudoers:
-    text = db.add_mail(message.chat.id, mail)
-    if text == "exist":
-      await bot.send_message(message.chat.id,
-                                 f"Sorry this mail ID is unavailable")
-      return
-    await db.send_message(
-      message.chat.id,
-      f"**Mail Created successfully.\nYour mail id : {mail}\nNow You can access your mails here.**"
-    )
-    return
-  if len(mails) == 0:
-    text = db.add_mail(message.chat.id, mail)
-    if text == "exist":
-      await bot.send_message(message.chat.id,
-                                 f"**Sorry this mail ID is unavailable**")
-      return
-    await bot.send_message(
-      message.chat.id,
-      f"**Mail Created successfully.\nYour mail id : {mail}\nNow You can access your mails here.**"
-    )
-  elif len(mails) > 0:
-    if len(mails) < member_mail_limit:
-      try:
-        user_exist = await client.get_chat_member('theostrich',
-                                                  message.from_user.id)
-        text = db.add_mail(message.chat.id, mail)
-        if text == "exist":
-          await bot.send_message(message.chat.id,
-                                     f"Sorry this mail ID is unavailable")
-          return
-        await bot.send_message(
-          message.chat.id,
-          f"Mail Created successfully.\nYour mail id : {mail}\nNow You can access your mails here."
-        )
-      except UserNotParticipant:
-        await message.reply_text(
-          text=
-          f"**Due to limited resource, making mails more than {non_member_mail_limit} require channel membership.**",
-          reply_markup=InlineKeyboardMarkup([[
-            InlineKeyboardButton(text="Join theostrich",
-                                 url=f"https://t.me/theostrich")
-          ]]))
-    else:
-      await bot.send_message(
-        message.chat.id,
-        f"Free users can make {member_mail_limit} mails only.\nSwitch to premium plan or delete any mail using /delete."
-      )
-
+async def no_mails(message):
+  text = "**You don't own any mail.\nUse /generate to get a new mail.**"
+  await message.reply_text(text,quote=True)
 
 
 @bot.on_message(filters.command(["delete"]))
 async def delete(client, message):
-  user = message.from_user.id
-  mails = database.mails(user)
-  if len(mails) != 0:
-    buttons = []
+  user =  db.get_user(message.from_user.id)
+  mailIDs = user.mails
 
-    for mail in mails:
-      buttons.append([InlineKeyboardButton(mail, f"delete_{mail}")])
-    await message.reply_text(text="**Select a mail:**",
-                             reply_markup=InlineKeyboardMarkup(buttons))
-  else:
-    await message.reply_text(
-      text="**You don't own any mail.\nUse /generate to get a new domain.**")
+  if len(mailIDs) == 0:
+      await no_mails(message)
+      return
 
-
-
-@bot.on_message(filters.command(["block"]))
-async def block_mail(client, message):
+  text = "**Select a mail:**"
+  keyboard = []
+  for mailID in mailIDs:
+      keyboard.append([InlineKeyboardButton(mailID, f"del_{mailID}")])
 
   await message.reply_text(
-    "**Select an option:**",
-    reply_markup=InlineKeyboardMarkup([[
-      InlineKeyboardButton("mail", callback_data="block_mails"),
-      InlineKeyboardButton("domain", callback_data="block_domains"),
-    ], [InlineKeyboardButton("regex", callback_data="block_regex")]]),
-    disable_web_page_preview=True)
+      text, reply_markup=InlineKeyboardMarkup(keyboard), quote=True
+  )
+
+
+@bot.on_message(filters.command(["mails"]))
+async def mails(client, message):
+  user =  db.get_user(message.from_user.id)
+  mailIDs = user.mails
+
+  if len(mailIDs) == 0:
+      await no_mails(message)
+      return
+
+  text = "**Select a mail:**"
+  keyboard = []
+  for mailID in mailIDs:
+      keyboard.append([InlineKeyboardButton(mailID, f"info_{mailID}")])
+
+  await message.reply_text(
+      text, reply_markup=InlineKeyboardMarkup(keyboard), quote=True
+  )
 
 
 @bot.on_message(filters.command(["transfer"]))
 async def transfer(client, message):
-  user = message.from_user.id
-  mails = db.mails(user)
+  user =  db.get_user(message.from_user.id)
+  mailIDs = user.mails
 
-  if len(mails) != 0:
-    buttons = []
+  if len(mailIDs) == 0:
+      await no_mails(message)
+      return
 
-    for mail in mails:
-      buttons.append([InlineKeyboardButton(mail, f"transfer_{mail}")])
-    await message.reply_text(text="**Select a mail:**",
-                             reply_markup=InlineKeyboardMarkup(buttons),
-                             reply_to_message_id=message.id)
-  else:
-    await message.reply_text(
-      text="**You don't own any mail.\nUse /generate to get a new domain.**")
+  text = "**Select a mail:**"
+  keyboard = []
+  for mailID in mailIDs:
+      keyboard.append([InlineKeyboardButton(mailID, f"tr_{mailID}")])
+
+  await message.reply_text(
+      text, reply_markup=InlineKeyboardMarkup(keyboard), quote=True
+  )
+
+
 
 async def transfer_mail(client, message, mail):
   recipient = await message.chat.ask("**Please enter new owners username**")
   args = recipient.text.split(" ")
+  
   if not args[0].startswith("@"):
     await client.send_message(
       message.chat.id,
@@ -206,12 +100,13 @@ async def transfer_mail(client, message, mail):
       f"**Cannot transfer {mail} to {args[0]}.\nBe sure that the user started me.**"
     )
     return
-  mails = db.mails(args[0])
 
-  limits = db.get_limits(args[0])
-  member_mail_limit = limits["limits"]["mails"]["member"]
+  user = db.get_user(args[0])
 
-  if len(mails) > member_mail_limit:
+  limits = user.get_limits()
+  max_mails = limits["max_mails"]
+
+  if len(user.mails) >= max_mails:
     await message.reply_text(
       f"**Cannot transfer {mail} to {args[0]}.\nThis user had exhausted free mail limits.**"
     )
@@ -231,6 +126,93 @@ Check your mails using /mails command.**''')
   await message.reply_text(
     f"**Successfully transferred {mail} to {recipient.text}")
 
+
+
+
+@bot.on_message(filters.command(["generate"]))
+async def generate(client, message):
+  buttons = []
+  domains = CONFIG.settings["domains"]
+  
+#  user = db.get_user(message.chat.id)
+  
+  
+#  if db.is_premium(message.chat.id):
+#    user_domains = db.get_user_domains(message.chat.id)
+#    all_domains = domains + user_domains
+#  else:
+#    all_domains = domains
+
+  for domain in domains:
+    buttons.append([InlineKeyboardButton(domain, f"new_{domain}")])
+
+  await message.reply_text(text="**Select a domain:**",
+                           disable_web_page_preview=True,
+                           reply_markup=InlineKeyboardMarkup(buttons),
+                           quote=True)
+  
+
+@bot.on_message(filters.command(["set"]))
+async def set_mail(client, message):
+  mailID = None
+  for entity in message.entities:
+    if entity.type == MessageEntityType.EMAIL:
+      o = entity.offset
+      l = entity.length
+      mailID = message.text[o:o + l]
+  if mailID == None:
+    await message.reply_text(text="**Provide a valid mail ID.**")
+    return
+
+  domain = mailID.split("@")
+
+  if domain[0].lower() in reserved_keyword:
+    await bot.send_message(message.chat.id,
+                               f"**Sorry this mail ID is unavailable**")
+    return
+  user = db.get_user(message.chat.id)
+
+  limits = user.get_limits()
+  max_mails = limits["max_mails"]
+
+
+ # if db.is_premium(message.chat.id):
+ #   user_domains = db.get_user_domains(message.chat.id)
+ #   print(user_domains)
+  #  all_domains = domains + user_domains
+ # else:
+ #   all_domains = domains
+  
+  if domain[1].lower() not in domains:
+    await bot.send_message(
+      message.chat.id,
+      f"**The domain {domain[1]} is not maintained by us.\nUse /domains to check list of available domains.\n\nIf you are the owner of {domain[1]} and interested to use it in this bot, contact us at @ostrichdiscussion.**"
+    )
+    return
+  if len(user.mails) >= max_mails:
+    await bot.send_message(
+      message.chat.id,
+      f"**Your plan includes reserving {max_mails} mails only.\nSwitch to premium plan to make more mails.**")
+    return
+  text = db.add_mail(message.chat.id, mailID)
+  if text == "exist":
+        await bot.send_message(message.chat.id,
+                                   f"Sorry this mail ID is unavailable")
+        return
+  await message.reply_text(
+          f"Mail Created successfully.\nYour mail id : {mailID}\nNow You can access your mails here."
+        )
+
+@bot.on_message(filters.command(["block"]))
+async def block_mail(client, message):
+
+  await message.reply_text(
+    "**Select an option:**",
+    reply_markup=InlineKeyboardMarkup([[
+      InlineKeyboardButton("mail", callback_data="block_mails"),
+      InlineKeyboardButton("domain", callback_data="block_domains"),
+    ], [InlineKeyboardButton("regex", callback_data="block_regex")]]),
+    disable_web_page_preview=True)
 
 
 
@@ -408,7 +390,6 @@ async def send(client, message):
 
 
 async def block(client, message, option):
-
   trigger = []
   if option == "mails":
     value = await message.chat.ask(
@@ -470,40 +451,72 @@ async def block(client, message, option):
 
 
 
-@app.route('/secretm/<id>')
-def secretm(id):
-  m = bot.get_messages(-1001816373321, id)
-  f = m.download()
-  return send_file(f)
 
 
 
-@app.route('/secretmessages', methods=['POST'])
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+@app.route('/cust', methods=['POST'])
+async def reciever():
+  mailbytes = await request.get_data()
+  mail = mailparser.parse_from_bytes(mailbytes)
+  multipart_data = MultipartEncoder(
+    fields={
+      "data":json.dumps({
+    "from" : mail.from_,
+    "to" : mail.to,
+    "cc" : mail.cc,
+    "bcc" : mail.bcc,
+    "subject" : mail.subject,
+    "body" : mail.body,
+    "text" : mail.text_plain,
+    "html" : mail.text_html,
+    "reply_to" : mail.reply_to,
+    "message_id" : mail.message_id
+    })}
+  )
+  requests.post(f"{CONFIG.baseURL}/secretmessages",data=multipart_data,headers={'Content-Type': multipart_data.content_type})
+  return 'Hello, World!'
+'''
+@app.route('/cust', methods=['POST'])
 async def secretmessages():
-  data = json.loads((await request.form).get("data"))
-  user = db.find_user(data['to'][0][1])
+  mailbytes = await request.get_data()
+  print(mailbytes)
+  mail = mailparser.parse_from_bytes(mailbytes)
+  
+  data =  { 
+    "from" : mail.from_,
+    "to" : mail.to,
+    "cc" : mail.cc,
+    "bcc" : mail.bcc,
+    "subject" : mail.subject,
+    "body" : mail.body,
+    "text" : mail.text_plain,
+    "html" : mail.text_html,
+    "reply_to" : mail.reply_to,
+    "message_id" : mail.message_id
+    }
+  
+  
+ # data = json.loads((await request.form).get("data"))
+  userID = db.find_user(data['to'][0][1])
 
   f = open("inbox.html", "w")
   f.write(str(data["html"][0]))
   f.close()
 
-  # m = ostrich.send_document(-1001816373321,"inbox.html")
-  #os.remove("inbox.html")
-
-  #print (m.id)
-
-  # headers = {"Content-Type": "application/json"}
-  # d = {
-  #   "Title": str(data.get("subject")),
-  #   "Author": "Penker",
-  #   "Content": str(data["html"][0][:1000])
-  # }
-  # req = requests.post("https://nekobin.com/api/documents",
-  #                     data=json.dumps(d),
-  #                     headers=headers)
-  #res = json.loads(req.text)
-  # key = res['result']['key']
-  #**Content    :** [Raw](https://nekobin.com/{key})\n\n\
   text = f"\
 **Sender     :** {data['from'][0][1]}\n\
 **Recipient  :** {data['to'][0][1]}\n\
@@ -511,20 +524,20 @@ async def secretmessages():
 **Message    :** {str(data['text'][0][:200])}\n...\
 "
 
-  file = await bot.send_document(chat_id=user, document="inbox.html")
+  file = await bot.send_document(chat_id=userID, document="inbox.html")
   await file.reply(
     text=text,
     reply_markup=InlineKeyboardMarkup([[
       InlineKeyboardButton(
         "View mail",
-        web_app=WebAppInfo(url=f"{baseURL}/inbox/{user}/{file.id}")),
+        web_app=WebAppInfo(url=f"{baseURL}/inbox/{userID}/{file.id}")),
     ], [
-      InlineKeyboardButton("Delete", callback_data="del"),
+      InlineKeyboardButton("OPEN", url=f"{baseURL}/inbox/{userID}/{file.id}"),
     ]]),quote = True)  
-
+  os.remove("inbox.html")
   return Response(status=200)
 
-
+'''
 @app.route('/messages', methods=['POST'])
 async def foo():
   token = (await request.form).get('token')
@@ -670,3 +683,4 @@ async def foo():
 
   return Response(status=200)
 
+'''

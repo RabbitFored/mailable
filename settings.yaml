@@ -1,5 +1,12 @@
-root: 1520625615    #top privilage user <no limits>
 sudoers: ["admins"] #grps with admin privilage, should be added in groups
+
+channel_url: "t.me/theostrich"
+group_url  : "t.me/ostrichdiscussion"
+donation_url: "https://paypal.me/donateostrich"
+
+force_sub: true
+
+domains: ['mail.bruva.co']
 
 groups:
 - name: "free"
@@ -13,13 +20,11 @@ groups:
   limits: 
     max_mails: 5
 
-force_sub: true
 
 broadcast:
-  users: all    #no. of users to send the message to
-  mode: forward #available options: forward, copy
+users: all    #no. of users to send the message to
+mode: forward #available options: forward, copy
 
-domains: ['mail.bruva.co']
 reserved_keyword : [
     'admin', 'owner', 'contact', 'support', 'donate', 'postmaster', 'message',
     'ostrich', 'administrator', 'access', 'account', 'mail', 'email', 'patner',
@@ -29,3 +34,7 @@ reserved_keyword : [
     'register', 'root', 'terms', 'user', 'webmaster', 'quantum', 'theostrich',
     'chat', 'melvik', 'storm', 'melvikstorm'
 ]
+
+MongoDB:
+  database: mailable
+  collection: usercache

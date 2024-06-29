@@ -17,10 +17,10 @@ async def user(client, message):
 
   if len(split) > 1:
     id = split[1]
-    user = db.user_info(id)
+    user = db.get_user(id)
   if message.reply_to_message:
     if message.reply_to_message.forward_from:
-      user = db.user_info(str(message.reply_to_message.forward_from.id))
+      user = db.get_user(str(message.reply_to_message.forward_from.id))
   if not user:
     await message.reply_text("**No user found!**")
     return

@@ -1,55 +1,43 @@
-from mailable.modules.database import database, stats
+from mailable.modules.database import collection, stats
 
-collection = database["usercache"]
+def is_mail_exist(mailID):
+  cursor = list(collection.find({'mails': mailID}))
+  if cursor:
+    return True
+  else:
+    return False
 
-def add_mail(user,mail):
-  mail = mail.lower()
-  cursor = collection.find({'mails': mail })
-
-  if len(list(cursor)) != 0:
+def add_mail(userID,mailID):
+  
+  mailID = mailID.lower()
+  if is_mail_exist(mailID):
     return "exist"
 
-
-  filter = { 'userid': user }
-  if isinstance(user, str):
-   if user.startswith("@"):
-     filter = {"username":user[1:]}
-  newvalues = { "$addToSet": { 'mails': mail }}
+  if isinstance(userID, str) and userID.startswith("@"):
+     filter = {"username":userID[1:]}
+  else:
+     filter = { 'userid': userID }
+    
+  newvalues = { "$addToSet": { 'mails': mailID }}
   collection.update_one(filter, newvalues)
   stats.statial("mails",1)
-
-
-def mails(user):
-  filter = { 'userid': user }
-  if isinstance(user, str):
-   if user.startswith("@"):
-     filter = {"username":user[1:]}
-  cursor = collection.find(filter)
-  mails = []
-  for i in cursor:
-    for mail in i["mails"]:
-      mails.append(mail)
-
-  return mails
+  
+def delete_mail(userID,mailID):
+  mailID = mailID.lower()
+  filter = {"userid":userID}
+  values = { "$pull": { "mails":  mailID}}
+  collection.update_one(filter, values)
+  stats.statial("mails",-1)
+  return True
 
 def block(user,option,value):
-  collection = database["usercache"]
   filter = { 'userid': user }
   newvalues = { "$addToSet": {f"blocked.{option}" :{"$each": value}}}
   collection.update_one(filter, newvalues)
 
 def unblock(user,option,values):
-  collection=database["usercache"]
   filter = {"userid":user}
   for value in values:
     values = { "$pull": { f"blocked.{option}" : value}}
     collection.update_one(filter, values)
 
-def delete_mail(user,mail):
-  mail = mail.lower()
-  collection=database["usercache"]
-  filter = {"userid":user}
-  values = { "$pull": { "mails":  mail}}
-  collection.update_one(filter, values)
-  stats.statial("mails",-1)
-  return mails

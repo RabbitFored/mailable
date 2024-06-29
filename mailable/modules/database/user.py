@@ -1,71 +1,72 @@
 from mailable.modules.database import database
+from mailable.modules.user import USER
 
 collection = database["usercache"]
 
-def user_exist(chatid,chattype):
-  if chattype == 'group' or chattype == "supergroup":
-      collection = database["groupcache"]
-
-  result = collection.find_one({'userid': chatid})
-
-  try:
-      result['userid']
-      userexist = True
-
-  except:
-      userexist = False
-
-  return userexist
-
-def is_premium(user):
-  result = collection.find_one({'userid': user})
-  plan = result["plan"]["type"]
-  if plan == "premium":
-     return True
+def get_user(userID):
+  if isinstance(userID, str) and userID.startswith("@"):
+    result = collection.find_one({"username": userID[1:]})
   else:
-    return False
+    result = collection.find_one({'userid': userID})
+  if result:
+    user = USER(result)
+    return user
+  else:
+    return None
 
-def user_info(userid):
-  if userid.startswith("@"):
-    cursor = collection.find({"username":userid[1:]})
-    for user in cursor:
-     return user
+def add_user(msg):
+  userID = msg.from_user.id
+  now = msg.date
+  username = msg.from_user.username
+  firstname = msg.from_user.first_name
+  lastname = msg.from_user.last_name
+  dc = msg.from_user.dc_id
 
-  cursor = collection.find({"userid":int(userid)})
-  for user in cursor:
-     return user
+  user = {}
+  user['userid'] = userID
+  user['username'] = username
+  user['firstname'] = firstname
+  user['lastname'] = lastname
+  user['is-banned'] = False
+  user['dc'] = dc
+  user['type'] = "free"
+
+#mailable  <<start>>
+  user['blocks'] = {
+    "domains": [],
+    "mails": [],
+    "regex": []
+  }
+  user['mails'] = []
+#mailable  <<end>>
+  
+  user['firstseen'] = now
+  user['lastseen'] = now
+
+  
+  collection.insert_one(user)
+  return True
+  
+def update_user(msg):
+  user = {}
+  user['firstname'] = msg.from_user.first_name
+  user['lastname'] = msg.from_user.last_name
+  user['username'] = msg.from_user.username
+  user['lastseen'] = msg.date
+
+  filter = { 'userid': msg.from_user.id }
+  newvalues = { "$set": user }
+  
+  collection.update_one(filter, newvalues)
 
 def find_user(mail):
   mail = mail.lower()
   cursor = collection.find({'mails': mail })
 
-  user = -1001337409011
+  userID = -1001337409011
 
   for i in cursor:
-    user = i['userid']
+    userID = i['userid']
 
-  return user
+  return userID
 
-def get_limits(user):
-  filter = { 'userid': user }
-  if isinstance(user, str):
-   if user.startswith("@"):
-     filter = {"username":user[1:]}
-  cursor = collection.find(filter)
-  for i in cursor:
-    plan = i["plan"]
-    return plan
-
-def get_user_domains(user):
-  result = collection.find_one({'userid': user})
-  if result.get("user_domains"):
-    return result["user_domains"]
-  else:
-    return []
-
-
-def get_blocked(user):
-  cursor = collection.find({"userid":user})
-  for i in cursor:
-    blocked = i["blocked"]
-    return blocked

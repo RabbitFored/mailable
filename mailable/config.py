@@ -11,7 +11,17 @@ class conf:
           if grp["name"] in sudoers_grps:
               sudoers = sudoers + grp["users"]
       return sudoers
+      
+  def get_limits(self,type):
+      grps = self.settings["groups"]
+      for grp in grps:
+          if grp["name"] == type:
+              return grp["limits"]
           
+      
+              
+      
+      
       
 
 ENV = bool(os.environ.get("ENV", False)) and not os.environ.get("ENV", False) == "False"

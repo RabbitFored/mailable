@@ -1,6 +1,23 @@
 from pyrogram import filters
 from mailable import bot
 from mailable.modules import database as db
+from mailable import CONFIG
+
+class USER:
+  def __init__( self, result ):
+     self.ID = result['userid']
+     self.username = result['username']
+     self.firstname = result['firstname']
+     self.lastname = result['lastname']
+     self.is_banned =result['is-banned']
+     self.dc = result['dc']
+     self.type =  result['type']
+     self.blocks = result['blocks']
+     self.mails =  result['mails'] 
+     self.firstseen =  result['firstseen']
+     self.lastseen =  result['lastseen']
+  def get_limits(self):
+     return CONFIG.get_limits(self.type)
 
 
 @bot.on_message(filters.command(["me"]))
@@ -24,7 +41,8 @@ Limits:
 
 @bot.on_message(filters.command(["blocks"]))
 async def blocks(client, message):
-  blocks = db.get_blocked(message.chat.id)
+  user = db.get_user(message.chat.id)
+  
   domains = "- **Domains:**\n"
   mails = "- **Mails:**\n"
   regex = "- **Regex:**\n"

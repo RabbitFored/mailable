@@ -13,6 +13,7 @@ def install_modules():
     for module in ALL_MODULES:
         importlib.import_module("mailable.modules." + module)
 
+#check users in banlist and forcesub
 @bot.on_message(user_filter)
 async def user_check(client, message):
     text = strings.FORCE_SUB_TEXT
@@ -40,9 +41,7 @@ async def start(client, message):
         reply_markup=InlineKeyboardMarkup(keyboard),
         quote=True,
     )
-
-    db.scrape(message)
-
+    
 
 @bot.on_message(filters.command(["help"]))
 async def get_help(client, message):
@@ -54,10 +53,12 @@ async def get_help(client, message):
 
     if chatID in sudoers:
         text += strings.ADMIN_HELP_TEXT
-
+        
+    group_url =  CONFIG.settings["group_url"]
+    
     keyboard = [
         [
-            InlineKeyboardButton("Get Help", url="t.me/ostrichdiscussion"),
+            InlineKeyboardButton("Get Help", url=group_url),
         ],
     ]
 
@@ -71,10 +72,14 @@ async def get_help(client, message):
 @bot.on_message(filters.command(["about"]))
 async def aboutTheBot(client, message):
     text = strings.ABOUT_TEXT
+    
+    channel_url = CONFIG.settings["channel_url"]
+    group_url =  CONFIG.settings["group_url"]
+    
     keyboard = [
         [
-            InlineKeyboardButton("➰Channel", url="t.me/theostrich"),
-            InlineKeyboardButton("👥Support Group", url="t.me/ostrichdiscussion"),
+            InlineKeyboardButton("➰Channel", url=channel_url),
+            InlineKeyboardButton("👥Support Group", url=group_url)
         ],
     ]
 
@@ -88,10 +93,14 @@ async def aboutTheBot(client, message):
 @bot.on_message(filters.command(["donate"]))
 async def donate(client, message):
     text = strings.DONATE_TEXT
+    
+    channel_url = CONFIG.settings["channel_url"]
+    donation_url =  CONFIG.settings["donation_url"]
+    
     keyboard = [
         [
-            InlineKeyboardButton("Contribute", url="https://github.com/theostrich"),
-            InlineKeyboardButton("Paypal Us", url="https://paypal.me/donateostrich"),
+            InlineKeyboardButton("Contribute", url=channel_url),
+            InlineKeyboardButton("Paypal Us", url=donation_url)
         ],
     ]
 

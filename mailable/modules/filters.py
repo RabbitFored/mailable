@@ -2,25 +2,36 @@ import json
 from pyrogram import filters
 from mailable import bot, CONFIG
 from pyrogram.errors import UserNotParticipant
+from mailable.modules import database as db
 
-async def user_check(_, __, m):
-  print(m.id)
-  json_object = json.loads(f"{m}")
+
+async def user_check(_, __, msg):
+  json_object = json.loads(f"{msg}")
   instance = json_object["_"]
 
   if instance == "Message":
-    user = m.chat.id
+    userID = msg.chat.id
   elif instance == "CallbackQuery":
-    user = m.message.chat.id
+    userID = msg.message.chat.id
   elif instance == "InlineQuery":
-    user = m.from_user.id
+    userID = msg.from_user.id
   else:
     print(instance)
-    
+
+  user = db.get_user(userID)
+  
+  if not user:
+    db.add_user(msg)
+  else:
+    db.update_user(msg)
+    if bool(user.is_banned):
+      return True
+  
   user_pass = False
+  
   if bool(CONFIG.settings["force_sub"]):
     try:
-      await bot.get_chat_member('theostrich',user)
+      await bot.get_chat_member('theostrich', userID)
       user_pass = True
     except UserNotParticipant:
       user_pass = False
@@ -32,8 +43,8 @@ async def user_check(_, __, m):
     
   return False
 
-async def sudoer_check(_, __, m):
-  user = m.chat.id
+async def sudoer_check(_, __, msg):
+  user = msg.chat.id
 
   sudoers = CONFIG.get_sudoers()
   if user in sudoers:
