@@ -493,7 +493,7 @@ async def reciever():
 @app.route('/cust', methods=['POST'])
 async def secretmessages():
   mailbytes = await request.get_data()
-  print(mailbytes)
+  print(await request.get_json())
   mail = mailparser.parse_from_bytes(mailbytes)
   
   data =  { 
@@ -508,8 +508,7 @@ async def secretmessages():
     "reply_to" : mail.reply_to,
     "message_id" : mail.message_id
     }
-  
-  
+
  # data = json.loads((await request.form).get("data"))
   userID = db.find_user(data['to'][0][1])
 
