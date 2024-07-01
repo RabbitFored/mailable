@@ -2,17 +2,13 @@ from pyrogram import filters
 from mailable import bot, app
 from mailable.modules import database as db
 from pyrogram.enums import MessageEntityType
-from mailable.constants import domains, sudoers, reserved_keyword
-from pyrogram.errors import UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from tldextract import extract
 import re
 from pyromod.helpers import ikb
 from mailable import CONFIG
-import requests 
 import os
-from quart import request, Response, send_file
-import json
+from quart import request, Response
 import mailparser
 
 apikey = CONFIG.apikey
@@ -438,35 +434,6 @@ async def block(client, message, option):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 '''
 @app.route('/cust', methods=['POST'])
 async def reciever():
@@ -493,7 +460,7 @@ async def reciever():
 @app.route('/cust', methods=['POST'])
 async def secretmessages():
   mailbytes = await request.get_data()
-  print(await request.get_json())
+ # print(await request.get_json())
   mail = mailparser.parse_from_bytes(mailbytes)
   
   data =  { 

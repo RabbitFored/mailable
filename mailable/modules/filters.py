@@ -3,7 +3,7 @@ from pyrogram import filters
 from mailable import bot, CONFIG
 from pyrogram.errors import UserNotParticipant
 from mailable.modules import database as db
-
+from functools import wraps
 
 async def user_check(_, __, msg):
   json_object = json.loads(f"{msg}")
@@ -23,7 +23,7 @@ async def user_check(_, __, msg):
   if not user:
     db.add_user(msg)
   else:
-    db.update_user(msg)
+    db.refresh_user(msg)
     if bool(user.is_banned):
       return True
   

@@ -4,7 +4,6 @@ from mailable import bot, logger, app
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from mailable import strings
-from mailable.modules import database as db
 from mailable import CONFIG
 from mailable.modules.filters import user_filter
 
@@ -16,11 +15,17 @@ def install_modules():
 #check users in banlist and forcesub
 @bot.on_message(user_filter)
 async def user_check(client, message):
-    text = strings.FORCE_SUB_TEXT
-
+    channel_url = CONFIG.settings["channel_url"]
+    text = strings.FORCE_SUB_TEXT.format(channel=f"@{channel_url.split('/')[-1]}")
+    keyboard = [
+        [
+            InlineKeyboardButton("Subscribe", url=channel_url),
+        ]
+    ]
     await message.reply_text(
         text,
         disable_web_page_preview=True,
+        reply_markup=InlineKeyboardMarkup(keyboard),
         quote=True,
     )
 

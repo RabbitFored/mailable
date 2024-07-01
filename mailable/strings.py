@@ -89,5 +89,5 @@ __Help us by sponsoring a domain or [buy us a cup of tea](https://ko-fi.com/rabb
 '''
 
 FORCE_SUB_TEXT = '''
-Subscribe to @theostrich to use this bot
+Subscribe to {channel} to use this bot
 '''

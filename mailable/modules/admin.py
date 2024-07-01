@@ -1,36 +1,52 @@
 from pyrogram import filters
-from mailable import bot
+from mailable import bot, utils
 from mailable.modules import database as db
 from mailable.modules.filters import sudo_filter
 
+  
+
 @bot.on_message(filters.command(["whois"]) & sudo_filter )
 async def whois(client, message):
-  split = message.text.split(" ")
-  user = db.find_user(split[1])
+  args = message.text.split(" ")
+  user = db.find_user(args[1])
 
-  await message.reply_text(f'''Mail {split[1]} belongs to {user}''')
+  await message.reply_text(f'Mail {args[1]} belongs to `{user.ID}`')
 
 @bot.on_message(filters.command(["user"])  & sudo_filter )
 async def user(client, message):
-  split = message.text.split(" ")
-  user = None
-
-  if len(split) > 1:
-    id = split[1]
-    user = db.get_user(id)
-  if message.reply_to_message:
-    if message.reply_to_message.forward_from:
-      user = db.get_user(str(message.reply_to_message.forward_from.id))
+  userID = utils.get_user(message)
+  user = db.get_user(userID)
+  
   if not user:
     await message.reply_text("**No user found!**")
     return
   text = f'''
-**User:** {user['firstname']}  {user['lastname']}
-**Username:** @{user['username']}
-**DC:** `{user['dc']}`
-**Plan:** `{user['plan']['type']}`
-**Mails:** `{user['mails']}`
-**First seen:** `{user['firstseen']}`
+**User:** {user.firstname} {user.lastname if user.lastname else "" }
+**Username:** @{user.username}
+**DC:** `{user.dc}`
+**Type:** `{user.type}`
+**Mails:** `{user.mails}`
+**First seen:** `{user.firstseen}`
+**Last seen:** `{user.lastseen}`
+**Banned** `{user.is_banned}`
 '''
 
   await message.reply_text(text)
+
+@bot.on_message(filters.command(["ban"])  & sudo_filter )
+async def ban(client, message):
+  userID = utils.get_user(message)
+  if not userID:
+    await message.reply_text("**No user found!**")
+    return
+  db.ban_user(userID)
+  await message.reply_text(f"Banned {userID}")
+
+@bot.on_message(filters.command(["unban"])  & sudo_filter )
+async def unban(client, message):
+  userID = utils.get_user(message)
+  if not userID:
+    await message.reply_text("**No user found!**")
+    return
+  db.unban_user(userID)
+  await message.reply_text(f"Unbanned {userID}")

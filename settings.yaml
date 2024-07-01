@@ -22,8 +22,8 @@ groups:
 
 
 broadcast:
-users: all    #no. of users to send the message to
-mode: forward #available options: forward, copy
+  users: all    #no. of users to send the message to
+  mode: forward #available options: forward, copy
 
 reserved_keyword : [
     'admin', 'owner', 'contact', 'support', 'donate', 'postmaster', 'message',

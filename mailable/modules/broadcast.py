@@ -2,15 +2,10 @@ from mailable import bot, logger, CONFIG, PROCESSES
 from pyrogram import filters
 import time
 from mailable.modules import database as db
+from mailable.modules.filters import sudo_filter
 
-
-@bot.on_message(filters.command(["broadcast"]))
+@bot.on_message(filters.command(["broadcast"]) & sudo_filter)
 async def broadcast(client, message):
-
-    chatID = message.chat.id
-    admins = CONFIG.settings["admins"]
-
-    if chatID in admins:
         if PROCESSES.broadcast:
             await message.reply_text("Another broadcast is already in progress. Please try again later.")
             return
@@ -44,8 +39,3 @@ async def broadcast(client, message):
         await message.reply_text(text)
         logger.info(text)
         PROCESSES.broadcast = False
-    else:
-        await client.send_message(
-            1520625615, f"Someone tried to access broadcast command,{chatID}"
-        )
-        logger.info(f"Someone tried to access broadcast command,{chatID}")

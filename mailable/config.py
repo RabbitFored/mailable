@@ -18,15 +18,11 @@ class conf:
           if grp["name"] == type:
               return grp["limits"]
           
-      
-              
-      
-      
-      
 
 ENV = bool(os.environ.get("ENV", False)) and not os.environ.get("ENV", False) == "False"
 secrets_path = "secrets.yaml"
 settings_path = "settings.yaml"
+
 if ENV:
     logger.info("Using values from ENV")
 
